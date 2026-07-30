@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Molecular Designs — Panel Configurator</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'IBM Plex Sans',system-ui,sans-serif;background:#f8fafc;color:#0f172a;padding:16px}
+.wrap{max-width:1100px;margin:0 auto}
+h1{font-size:22px;font-weight:800;line-height:1.2;margin:0 0 2px}
+.sub{font-size:12px;color:#64748b;margin:0 0 14px}
+.lbl{font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.8px}
+.ptabs{display:flex;gap:0;margin-bottom:16px;border-bottom:3px solid #e2e8f0;overflow-x:auto}
+.ptab{padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;border:none;background:none;color:#64748b;border-bottom:3px solid transparent;margin-bottom:-3px;transition:all .15s;font-family:inherit;white-space:nowrap}
+.ptab.a{color:#1e40af;border-bottom-color:#1e40af}.ptab:hover:not(.a){color:#0f172a}
+.brow{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.btn{padding:7px 14px;border-radius:10px;border:2px solid #e2e8f0;background:#fff;color:#475569;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;font-family:inherit}
+.btn.a{border-color:#1e40af;background:#1e40af;color:#fff}
+.btn.c{border-color:#f59e0b;background:#fffbeb;color:#92400e;cursor:default}
+.stats{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.st{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:8px 12px;flex:1 1 70px;min-width:70px}
+.sv{font-size:16px;font-weight:700;margin-top:2px}
+.wg{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px}
+.wc{background:#fff;border-radius:14px;border:2.5px solid #e2e8f0;overflow:hidden;min-width:180px;flex:1 1 180px;max-width:270px;cursor:pointer;transition:all .2s;position:relative;user-select:none}
+.wc.on{box-shadow:0 4px 16px rgba(0,0,0,.08);opacity:1}.wc.off{opacity:.38;box-shadow:none}.wc:hover{transform:translateY(-1px)}
+.wh{padding:8px 12px;display:flex;align-items:center;gap:7px;transition:background .2s}
+.wh .n{background:rgba(255,255,255,.2);color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700}
+.wh .nm{color:#fff;font-weight:700;font-size:12px;letter-spacing:.2px}
+.wb{padding:5px 12px 8px}
+.tr{display:flex;align-items:center;padding:3px 0;font-size:11px;font-weight:500}
+.td{position:absolute;top:8px;right:8px;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.td.on{background:#22c55e;box-shadow:0 0 0 3px rgba(34,197,94,.2);color:#fff;font-size:12px;font-weight:900}
+.td.off{background:#cbd5e1;color:#fff;font-size:10px;font-weight:700}
+.note{border-radius:10px;padding:10px 14px;margin-bottom:10px;font-size:11px;line-height:1.5}
+.note b{font-weight:700}
+.note.warn{background:#fffbeb;border:1px solid #fde68a;color:#92400e}
+.note.green{background:#f0fdf4;border:1px solid #86efac;color:#14532d}
+table.tp{width:100%;border-collapse:collapse;font-size:12px}
+table.tp th{text-align:center;padding:6px 8px;color:#64748b;font-weight:700;font-size:11px}
+table.tp th:first-child{text-align:left}
+table.tp td{text-align:center;padding:6px 8px}
+table.tp td:first-child{text-align:left;font-weight:600}
+table.tp thead tr{border-bottom:2px solid #e2e8f0}
+table.tp tbody tr{border-bottom:1px solid #f1f5f9}
+.tp-green{font-weight:700;color:#16a34a;font-size:14px}
+.tp-warn{color:#b45309;font-weight:600;font-size:10px}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<script>
+const PANELS={
+respiratory:{title:"Respiratory Pathogen Panel",sub:"Click wells to configure \u00b7 QS5 / Bio-Rad Opus Platform",controlWell:null,
+  wells:{CFR:{lbl:"COVID / Flu / RSV",num:"1",hdr:"#be185d",bdr:"#f9a8d4",bg:"#fce7f3",t:["SARS-CoV-2","Influenza A","Influenza B","RSV A/B"]},RP1:{lbl:"Resp Pathogens I",num:"2",hdr:"#7c3aed",bdr:"#c4b5fd",bg:"#ede9fe",t:["Adenovirus","Rhinovirus/Enterovirus","Mycoplasma pneumoniae","HMPV"]},COV:{lbl:"Coronaviruses",num:"3",hdr:"#2563eb",bdr:"#93c5fd",bg:"#dbeafe",t:["OC43","229E","HKU1","NL63"]},PIV:{lbl:"Parainfluenza",num:"4",hdr:"#16a34a",bdr:"#86efac",bg:"#d1fae5",t:["PIV1","PIV2","PIV3","PIV4"]},BP:{lbl:"Bacterial Pathogens",num:"5",hdr:"#c2410c",bdr:"#fdba74",bg:"#fed7aa",t:["Bordetella pertussis","Streptococcus pyogenes","Chlamydophila pneumoniae","Streptococcus dysgalactiae"]},RP2:{lbl:"Resp Pathogens II",num:"6",hdr:"#475569",bdr:"#cbd5e1",bg:"#e2e8f0",t:["Bordetella parapertussis","Legionella pneumophila","Bocavirus","Streptococcus pneumoniae"]}},
+  order:["CFR","RP1","COV","PIV","BP","RP2"],presets:{full:{l:"RPP Full (6 wells)",k:["CFR","RP1","COV","PIV","BP","RP2"]},mini:{l:"RPP Lite (3 wells)",k:["CFR","RP1","BP"]},combo:{l:"CFR Only (1 well)",k:["CFR"]}},defaultPreset:"mini"},
+uti:{title:"UTI Panel",sub:"Click wells to configure \u00b7 QS5 / Bio-Rad Opus Platform",controlWell:null,
+  wells:{W1:{lbl:"Core UTI I",num:"1",hdr:"#16a34a",bdr:"#86efac",bg:"#dcfce7",t:["E. coli","E. faecalis","E. faecium","S. agalactiae","S. aureus"]},W2:{lbl:"Core UTI II",num:"2",hdr:"#15803d",bdr:"#4ade80",bg:"#dcfce7",t:["K. pneumoniae","P. aeruginosa","P. mirabilis","S. saprophyticus"]},W3:{lbl:"Gram-Neg Extended I",num:"3",hdr:"#2563eb",bdr:"#93c5fd",bg:"#dbeafe",t:["A. baumannii","K. aerogenes","K. oxytoca","M. morganii"]},W4:{lbl:"Gram-Neg Extended II",num:"4",hdr:"#0369a1",bdr:"#7dd3fc",bg:"#e0f2fe",t:["C. freundii","E. cloacae","S. marcescens","P. vulgaris"]},W5:{lbl:"Candida (7 spp)",num:"5",hdr:"#b45309",bdr:"#fde68a",bg:"#fef3c7",t:["C. albicans","C. dubliniensis","C. lusitaniae","C. tropicalis","C. glabrata","C. parapsilosis","C. krusei"]},W6:{lbl:"STI / Urogenital",num:"6",hdr:"#be185d",bdr:"#f9a8d4",bg:"#fce7f3",t:["CT","NG","T. vaginalis","M. genitalium","EC (Endo Control)"]},W7:{lbl:"Urogenital / Atypical",num:"7",hdr:"#e11d48",bdr:"#fda4af",bg:"#ffe4e6",t:["U. urealyticum","M. hominis","Providencia"]},W8:{lbl:"Low-Prevalence ID",num:"8",hdr:"#4f46e5",bdr:"#a5b4fc",bg:"#e0e7ff",t:["CoNS","A. urinae","C. urealyticum"]},W9:{lbl:"AMR \u2013 Glyco/FQ/Fosfo",num:"9",hdr:"#dc2626",bdr:"#fca5a5",bg:"#fee2e2",t:["vanA","vanB","qnrABS","fosA"]},W10:{lbl:"AMR \u2013 ESBL + Carb",num:"10",hdr:"#b91c1c",bdr:"#f87171",bg:"#fee2e2",t:["CTX-M (Groups 1 & 9)","KPC","IMP"]},W11:{lbl:"AMR \u2013 Carb/MBL",num:"11",hdr:"#991b1b",bdr:"#ef4444",bg:"#fee2e2",t:["NDM","VIM","OXA"]},W12:{lbl:"AMR \u2013 TMP/Tet",num:"12",hdr:"#dc2626",bdr:"#fca5a5",bg:"#fee2e2",t:["dfrA","tetABMS"]},W13:{lbl:"AMR \u2013 AmpC + ESBL",num:"13",hdr:"#b91c1c",bdr:"#f87171",bg:"#fee2e2",t:["ampC","SHV","TEM"]},W14:{lbl:"AMR \u2013 MRSA/Sulfa",num:"14",hdr:"#991b1b",bdr:"#ef4444",bg:"#fee2e2",t:["mecA","sul1/2/3"]}},
+  order:["W1","W2","W3","W4","W5","W6","W7","W8","W9","W10","W11","W12","W13","W14"],presets:{uti65:{l:"UTI 65 (14 wells)",k:["W1","W2","W3","W4","W5","W6","W7","W8","W9","W10","W11","W12","W13","W14"]},lite:{l:"UTI 27 (6 wells)",k:["W1","W2","W9","W10","W12","W13"]},uc_sti:{l:"UC UTI w/ STI (8 wells)",k:["W1","W2","W5","W6","W9","W10","W11","W12"]},uc_ns:{l:"UC UTI No STI (8 wells)",k:["W1","W2","W5","W9","W10","W11","W12","W14"]}},defaultPreset:"uti65"},
+vaginitis:{title:"Vaginitis Panel",sub:"Click wells to configure \u00b7 Controls MP with Meg Type 1 (Well 5)",controlWell:"V5",
+  wells:{V1:{lbl:"BV Markers I",num:"1",hdr:"#7c3aed",bdr:"#c4b5fd",bg:"#ede9fe",t:["BVAB-2","Megasphaera Type 2"]},V2:{lbl:"BV Markers II",num:"2",hdr:"#6d28d9",bdr:"#a78bfa",bg:"#ede9fe",t:["A. vaginae","G. vaginalis","M. curtisii"]},V3:{lbl:"Candida (7 spp)",num:"3",hdr:"#b45309",bdr:"#fde68a",bg:"#fef3c7",t:["C. albicans","C. dubliniensis","C. glabrata","C. krusei","C. lusitaniae","C. parapsilosis","C. tropicalis"]},V4:{lbl:"STI / Core",num:"4",hdr:"#be185d",bdr:"#f9a8d4",bg:"#fce7f3",t:["C. trachomatis","N. gonorrhoeae","T. vaginalis","EC (Endo Control)"]},V5:{lbl:"Megasphaera Type 1",num:"5",hdr:"#9333ea",bdr:"#c084fc",bg:"#f3e8ff",t:["Megasphaera Type 1"]},V6:{lbl:"Urogenital / Mycoplasma",num:"6",hdr:"#e11d48",bdr:"#fda4af",bg:"#ffe4e6",t:["M. genitalium","M. hominis","U. urealyticum"]}},
+  order:["V1","V2","V3","V4","V5","V6"],presets:{full:{l:"Full Vag Panel (6 wells)",k:["V1","V2","V3","V4","V5","V6"]}},defaultPreset:"full"},
+gi:{title:"GI Simplicity Panel",sub:"Click wells to configure \u00b7 Controls MP with ETEC/EIEC/STEC (Well 2)",controlWell:"G2",
+  wells:{G1:{lbl:"C. difficile",num:"1",hdr:"#dc2626",bdr:"#fca5a5",bg:"#fee2e2",t:["C. diff tcdA","C. diff tcdB","EC (Endo Control)"]},G2:{lbl:"ETEC / EIEC / STEC",num:"2",hdr:"#b91c1c",bdr:"#f87171",bg:"#fee2e2",t:["ETEC","EIEC","STEC"]},G3:{lbl:"Parasites",num:"3",hdr:"#b45309",bdr:"#fde68a",bg:"#fef3c7",t:["Cryptosporidium spp.","E. histolytica","G. lamblia"]},G4:{lbl:"Bacterial Enteric",num:"4",hdr:"#c2410c",bdr:"#fdba74",bg:"#fed7aa",t:["Campylobacter spp.","Salmonella spp.","Enterovirus (O670)","Vibrio spp."]},G5:{lbl:"Viral Enteric",num:"5",hdr:"#2563eb",bdr:"#93c5fd",bg:"#dbeafe",t:["Adenovirus (O670)","Rotavirus","Astrovirus"]},G6:{lbl:"Norovirus",num:"6",hdr:"#0369a1",bdr:"#7dd3fc",bg:"#e0f2fe",t:["Norovirus"]},G7:{lbl:"Cyclospora",num:"7",hdr:"#15803d",bdr:"#4ade80",bg:"#dcfce7",t:["Cyclospora cayetanensis"]}},
+  order:["G1","G2","G3","G4","G5","G6","G7"],presets:{full:{l:"GI Simplicity (6 wells)",k:["G1","G2","G3","G4","G5","G6"]},cyclo:{l:"GI + Cyclospora (7 wells)",k:["G1","G2","G3","G4","G5","G6","G7"]}},defaultPreset:"full"},
+lesion:{title:"Lesion Panel",sub:"Click wells to configure \u00b7 5 targets + EC + PC/NC MP with H. ducreyi = 8 wells/column",controlWell:"LS1",fixedTP:{s96:12,s384:48},
+  wells:{LS1:{lbl:"H. ducreyi",num:"1",hdr:"#dc2626",bdr:"#fca5a5",bg:"#fee2e2",t:["H. ducreyi"]},LS2:{lbl:"HSV-1",num:"2",hdr:"#2563eb",bdr:"#93c5fd",bg:"#dbeafe",t:["HSV-1"]},LS3:{lbl:"HSV-2",num:"3",hdr:"#0369a1",bdr:"#7dd3fc",bg:"#e0f2fe",t:["HSV-2"]},LS4:{lbl:"T. pallidum",num:"4",hdr:"#b91c1c",bdr:"#f87171",bg:"#fee2e2",t:["T. pallidum"]},LS5:{lbl:"VZV",num:"5",hdr:"#7c3aed",bdr:"#c4b5fd",bg:"#ede9fe",t:["VZV"]}},
+  order:["LS1","LS2","LS3","LS4","LS5"],presets:{full:{l:"Full Lesion Panel (5 wells)",k:["LS1","LS2","LS3","LS4","LS5"]}},defaultPreset:"full"},
+};
+
+let panel="respiratory",active=new Set(PANELS.respiratory.presets.mini.k);
+
+function getThroughput(wc,cf){
+  if(wc===0)return{s96:0,s384:0};
+  if(cf){const s=Math.floor(8/wc);return{s96:s*12,s384:s*48};}
+  if(wc<=6){const s=Math.floor(6/wc);return{s96:s*12,s384:s*48};}
+  if(8%wc===0){const s96=Math.floor((96-2)/wc);return{s96,s384:Math.floor((384-2)/wc)};}
+  return{s96:Math.floor(96/(wc+2)),s384:Math.floor(384/(wc+2))};
+}
+
+function render(){
+  const P=PANELS[panel],keys=P.order.filter(k=>active.has(k));
+  const tCount=keys.reduce((s,k)=>{const w=P.wells[k];return s+(w?w.t.length:0);},0);
+  const wc=keys.length;
+  const cf=P.controlWell?active.has(P.controlWell):false;
+  const cn=P.controlWell?P.wells[P.controlWell]?.lbl:"";
+  const tp=wc>0?(P.fixedTP||getThroughput(wc,cf)):{s96:0,s384:0};
+  let curP="custom";for(const[pk,pv] of Object.entries(P.presets)){if(pv.k.length===keys.length&&pv.k.every(x=>active.has(x))){curP=pk;break;}}
+  let h='<div class="ptabs">';
+  ["respiratory","uti","vaginitis","gi","lesion"].forEach(p=>{const l={respiratory:"Respiratory",uti:"UTI",vaginitis:"Vaginitis",gi:"GI",lesion:"Lesion"};h+=`<button class="ptab ${panel===p?'a':''}" onclick="sw('${p}')">${l[p]}</button>`;});
+  h+='</div>';
+  h+=`<div class="lbl" style="margin-bottom:4px">MOLECULAR DESIGNS</div><h1>${P.title}</h1><p class="sub">${P.sub}</p>`;
+  h+='<div class="brow">';for(const[pk,pv] of Object.entries(P.presets)){h+=`<button class="btn ${curP===pk?'a':''}" onclick="ap('${pk}')">${pv.l}</button>`;}
+  h+=`<button class="btn ${curP==='custom'?'c':''}" onclick="clearAll()">Custom</button></div>`;
+  h+='<div class="stats">';
+  h+=stat("Target Wells",wc)+stat("Targets",tCount);
+  h+=`<div class="st"><div class="lbl">TP (96)</div><div class="sv">${tp.s96}</div></div>`;
+  h+=`<div class="st"><div class="lbl">TP (384)</div><div class="sv">${tp.s384}</div></div></div>`;
+  if(P.controlWell){if(cf)h+=`<div class="note green"><b>Controls:</b> PC/NC multiplexed with ${cn}. No dedicated control wells needed.</div>`;else if(wc>0)h+=`<div class="note warn"><b>Controls:</b> ${cn} not selected. PC+NC require 2 dedicated wells, reducing throughput.</div>`;}
+  h+='<div class="wg">';
+  P.order.forEach(wk=>{const v=P.wells[wk];if(!v)return;const on=active.has(wk),ic=wk===P.controlWell;
+    h+=`<div class="wc ${on?'on':'off'}" style="border-color:${on?v.bdr:'#e2e8f0'}" onclick="tg('${wk}')"><div class="td ${on?'on':'off'}">${on?'\u2713':'\u25CB'}</div><div class="wh" style="background:${on?v.hdr:'#94a3b8'}"><span class="n">${v.num}</span><span class="nm">${v.lbl}${ic?' \u2728':''}</span></div><div class="wb">`;
+    v.t.forEach((tgt,i)=>{const nm=typeof tgt==='string'?tgt:tgt.n;const it=/^[A-Z]/.test(nm)&&nm.includes('.')&&!nm.startsWith('EC');
+      h+=`<div class="tr" style="border-bottom:${i<v.t.length-1?'1px solid '+v.bg:'none'}"><span style="${it?'font-style:italic':''}">${nm}</span></div>`;});
+    if(ic)h+=`<div style="padding:4px 0;margin-top:2px;border-top:1px dashed ${v.bdr};font-size:9px;color:${v.hdr};font-weight:600;text-align:center">PC / NC multiplexed here</div>`;
+    h+='</div></div>';});
+  h+='</div>';
+  if(wc>0){const brk=!((8%wc===0)||(wc===8))||(wc<=6&&6%wc!==0);const spills=wc>6&&8%wc!==0;const colPack=wc<=6;
+    const c96=96-(tp.s96*wc),c384=384-(tp.s384*wc);
+    let cd='';if(cf)cd=`Controls MP with ${cn}`;else if(spills)cd=`Breakaway (pairs): PC in one column, NC in next (${wc}+2=${wc+2} wells per sample pair)`;else if(colPack)cd=`${Math.floor(6/wc)} sample(s) + PC+NC per column`;else cd=`Non-breakaway: 2 controls per plate`;
+    h+=`<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px 16px;margin-top:8px"><div style="font-size:12px;font-weight:700;margin-bottom:4px">Plate Throughput</div><div style="font-size:10px;color:#64748b;margin-bottom:8px">${cd}</div>`;
+    h+=`<table class="tp"><thead><tr><th>Plate</th><th>Total</th><th>Controls</th><th>Target Wells</th><th style="color:#16a34a">Samples / Run</th><th>Format</th></tr></thead><tbody>`;
+    h+=`<tr><td>96-Well</td><td>96</td><td>${c96}</td><td>${tp.s96*wc}</td><td class="tp-green">${tp.s96}</td><td style="font-size:10px">${brk?'<span class="tp-warn">Breakaway</span>':'Standard'}</td></tr>`;
+    h+=`<tr><td>384-Well</td><td>384</td><td>${c384}</td><td>${tp.s384*wc}</td><td class="tp-green">${tp.s384}</td><td style="font-size:10px">${brk?'<span class="tp-warn">Breakaway</span>':'Standard'}</td></tr>`;
+    h+=`</tbody></table></div>`;}
+  document.getElementById('app').innerHTML=h;
+}
+function stat(l,v){return`<div class="st"><div class="lbl">${l}</div><div class="sv">${v}</div></div>`;}
+function sw(p){panel=p;active=new Set(PANELS[p].presets[PANELS[p].defaultPreset].k);render();}
+function tg(k){if(active.has(k))active.delete(k);else active.add(k);render();}
+function ap(key){active=new Set(PANELS[panel].presets[key].k);render();}
+function clearAll(){active=new Set();render();}
+render();
+</script>
+</body>
+</html>
