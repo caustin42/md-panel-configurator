@@ -61,7 +61,7 @@ uti:{title:"UTI Panel",sub:"Click wells to configure \u00b7 QS5 / Bio-Rad Opus P
 vaginitis:{title:"Vaginitis Panel",sub:"Click wells to configure \u00b7 Controls MP with Meg Type 1 (Well 5)",controlWell:"V5",
   wells:{V1:{lbl:"BV Markers I",num:"1",hdr:"#7c3aed",bdr:"#c4b5fd",bg:"#ede9fe",t:["BVAB-2","Megasphaera Type 2"]},V2:{lbl:"BV Markers II",num:"2",hdr:"#6d28d9",bdr:"#a78bfa",bg:"#ede9fe",t:["A. vaginae","G. vaginalis","M. curtisii"]},V3:{lbl:"Candida (7 spp)",num:"3",hdr:"#b45309",bdr:"#fde68a",bg:"#fef3c7",t:["C. albicans","C. dubliniensis","C. glabrata","C. krusei","C. lusitaniae","C. parapsilosis","C. tropicalis"]},V4:{lbl:"STI / Core",num:"4",hdr:"#be185d",bdr:"#f9a8d4",bg:"#fce7f3",t:["C. trachomatis","N. gonorrhoeae","T. vaginalis","EC (Endo Control)"]},V5:{lbl:"Megasphaera Type 1",num:"5",hdr:"#9333ea",bdr:"#c084fc",bg:"#f3e8ff",t:["Megasphaera Type 1"]},V6:{lbl:"Urogenital / Mycoplasma",num:"6",hdr:"#e11d48",bdr:"#fda4af",bg:"#ffe4e6",t:["M. genitalium","M. hominis","U. urealyticum"]}},
   order:["V1","V2","V3","V4","V5","V6"],presets:{full:{l:"Full Vag Panel (6 wells)",k:["V1","V2","V3","V4","V5","V6"]}},defaultPreset:"full"},
-gi:{title:"GI Simplicity Panel",sub:"Click wells to configure \u00b7 Dedicated PC + NC wells per run",controlWell:null,
+gi:{title:"GI Simplicity Panel",sub:"Click wells to configure \u00b7 Dedicated PC + NC wells \u00b7 With Cyclospora: breakaway in pairs",controlWell:null,fixedTP7:{s96:12,s384:48},
   wells:{G1:{lbl:"C. difficile",num:"1",hdr:"#dc2626",bdr:"#fca5a5",bg:"#fee2e2",t:["C. diff tcdA","C. diff tcdB","EC (Endo Control)"]},G2:{lbl:"ETEC / EIEC / STEC",num:"2",hdr:"#b91c1c",bdr:"#f87171",bg:"#fee2e2",t:["ETEC","EIEC","STEC"]},G3:{lbl:"Parasites",num:"3",hdr:"#b45309",bdr:"#fde68a",bg:"#fef3c7",t:["Cryptosporidium spp.","E. histolytica","G. lamblia"]},G4:{lbl:"Bacterial Enteric",num:"4",hdr:"#c2410c",bdr:"#fdba74",bg:"#fed7aa",t:["Campylobacter spp.","Salmonella spp.","Enterovirus (O670)","Vibrio spp."]},G5:{lbl:"Viral Enteric",num:"5",hdr:"#2563eb",bdr:"#93c5fd",bg:"#dbeafe",t:["Adenovirus (O670)","Rotavirus","Astrovirus"]},G6:{lbl:"Norovirus",num:"6",hdr:"#0369a1",bdr:"#7dd3fc",bg:"#e0f2fe",t:["Norovirus"]},G7:{lbl:"Cyclospora",num:"7",hdr:"#15803d",bdr:"#4ade80",bg:"#dcfce7",t:["Cyclospora cayetanensis"]}},
   order:["G1","G2","G3","G4","G5","G6","G7"],presets:{full:{l:"GI Simplicity (6 wells)",k:["G1","G2","G3","G4","G5","G6"]},cyclo:{l:"GI + Cyclospora (7 wells)",k:["G1","G2","G3","G4","G5","G6","G7"]}},defaultPreset:"full"},
 lesion:{title:"Lesion Panel",sub:"Click wells to configure \u00b7 5 targets + EC + PC/NC MP with H. ducreyi = 8 wells/column",controlWell:"LS1",fixedTP:{s96:12,s384:48},
@@ -85,7 +85,7 @@ function render(){
   const wc=keys.length;
   const cf=P.controlWell?active.has(P.controlWell):false;
   const cn=P.controlWell?P.wells[P.controlWell]?.lbl:"";
-  const tp=wc>0?(P.fixedTP||getThroughput(wc,cf)):{s96:0,s384:0};
+  const tp=wc>0?(P.fixedTP||(P.fixedTP7&&wc===7?P.fixedTP7:null)||getThroughput(wc,cf)):{s96:0,s384:0};
   let curP="custom";for(const[pk,pv] of Object.entries(P.presets)){if(pv.k.length===keys.length&&pv.k.every(x=>active.has(x))){curP=pk;break;}}
   let h='<div class="ptabs">';
   ["respiratory","uti","vaginitis","gi","lesion"].forEach(p=>{const l={respiratory:"Respiratory",uti:"UTI",vaginitis:"Vaginitis",gi:"GI",lesion:"Lesion"};h+=`<button class="ptab ${panel===p?'a':''}" onclick="sw('${p}')">${l[p]}</button>`;});
@@ -108,7 +108,7 @@ function render(){
   h+='</div>';
   if(wc>0){const brk=!((8%wc===0)||(wc===8))||(wc<=6&&6%wc!==0);const spills=wc>6&&8%wc!==0;const colPack=wc<=6;
     const c96=96-(tp.s96*wc),c384=384-(tp.s384*wc);
-    let cd='';if(cf)cd=`Controls MP with ${cn}`;else if(spills)cd=`Breakaway (pairs): PC in one column, NC in next (${wc}+2=${wc+2} wells per sample pair)`;else if(colPack)cd=`${Math.floor(6/wc)} sample(s) + PC+NC per column`;else cd=`Non-breakaway: 2 controls per plate`;
+    let cd='';if(cf)cd=`Controls MP with ${cn}`;else if(spills)cd=`Breakaway (pairs): 7 targets + PC in col 1, 7 targets + NC in col 2. Snap off in units of 2 columns.`;else if(colPack)cd=`${Math.floor(6/wc)} sample(s) + PC+NC per column`;else cd=`Non-breakaway: 2 controls per plate`;
     h+=`<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px 16px;margin-top:8px"><div style="font-size:12px;font-weight:700;margin-bottom:4px">Plate Throughput</div><div style="font-size:10px;color:#64748b;margin-bottom:8px">${cd}</div>`;
     h+=`<table class="tp"><thead><tr><th>Plate</th><th>Total</th><th>Controls</th><th>Target Wells</th><th style="color:#16a34a">Samples / Run</th><th>Format</th></tr></thead><tbody>`;
     h+=`<tr><td>96-Well</td><td>96</td><td>${c96}</td><td>${tp.s96*wc}</td><td class="tp-green">${tp.s96}</td><td style="font-size:10px">${brk?'<span class="tp-warn">Breakaway</span>':'Standard'}</td></tr>`;
