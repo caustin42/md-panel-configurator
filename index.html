@@ -238,14 +238,30 @@ wound:{
   },
   order:["WD1","WD2","WD3","WD4","WD5","WD6","WD7","WD8","WD9","WD10","WD11","WD12","WD13","WD14"],
   presets:{
-    mrsa:{l:"MRSA Screen (2w)",k:["WD1","WD9"],icd:"Z22.322 · Z11.59"},
-    vre:{l:"VRE Screen (2w)",k:["WD1","WD8"],icd:"Z22.8 · Z11.59"},
-    staph:{l:"Staph/Strep Quick (3w)",k:["WD1","WD6","WD9"],icd:"L03.x · L02.x · L01.0"},
-    gramneg:{l:"Gram-Neg Wound (2w)",k:["WD2","WD3"],icd:"T30.x · E11.621 · L97.x"},
-    core:{l:"Wound Core (5w)",k:["WD1","WD2","WD6","WD8","WD9"],icd:"T79.3 · L08.9"},
-    fungal:{l:"Wound + Fungal (6w)",k:["WD1","WD2","WD5","WD6","WD8","WD9"],icd:"L97.x · B37.2"},
-    ssi:{l:"SSI (10w)",k:["WD1","WD2","WD3","WD4","WD5","WD6","WD8","WD9","WD10","WD11"],icd:"T81.41A–49A"},
-    full:{l:"Skin Microbiota 63 (14w)",k:["WD1","WD2","WD3","WD4","WD5","WD6","WD7","WD8","WD9","WD10","WD11","WD12","WD13","WD14"],icd:"L89.x · L97.x · E11.622"},
+    mrsa:{l:"MRSA Screen (2w)",k:["WD1","WD9"],
+      icd:"Z22.322 Carrier of MRSA · Z11.59 Screening for other bacterial diseases",
+      pt:"Pre-op / admission MRSA colonization screening"},
+    vre:{l:"VRE Screen (2w)",k:["WD1","WD8"],
+      icd:"Z22.8 Carrier of other infectious diseases · Z11.59 Screening for other bacterial diseases",
+      pt:"ICU / transplant / long-term care VRE colonization screening"},
+    staph:{l:"Staph/Strep Quick (3w)",k:["WD1","WD6","WD9"],
+      icd:"L03.x Cellulitis & acute lymphangitis · L02.x Cutaneous abscess / furuncle · L01.0 Impetigo",
+      pt:"Acute skin / soft tissue infection — cellulitis, abscess, impetigo"},
+    gramneg:{l:"Gram-Neg Wound (2w)",k:["WD2","WD3"],
+      icd:"T30.x Burn / corrosion, unspecified · E11.621 Type 2 DM with foot ulcer · L97.x Non-pressure chronic ulcer of lower limb",
+      pt:"Chronic / diabetic wound with suspected gram-negative infection"},
+    core:{l:"Wound Core (5w)",k:["WD1","WD2","WD6","WD8","WD9"],
+      icd:"T79.3 Post-traumatic wound infection · L08.9 Local infection of skin / subcutaneous tissue, unspecified",
+      pt:"Traumatic or post-surgical wound infection — general workup"},
+    fungal:{l:"Wound + Fungal (6w)",k:["WD1","WD2","WD5","WD6","WD8","WD9"],
+      icd:"L97.x Non-pressure chronic ulcer of lower limb · B37.2 Cutaneous candidiasis",
+      pt:"Non-healing chronic wound with suspected fungal co-infection"},
+    ssi:{l:"SSI (10w)",k:["WD1","WD2","WD3","WD4","WD5","WD6","WD8","WD9","WD10","WD11"],
+      icd:"T81.41A–49A Infection following a procedure",
+      pt:"Post-operative surgical site infection (SSI) — comprehensive workup"},
+    full:{l:"Skin Microbiota 63 (14w)",k:["WD1","WD2","WD3","WD4","WD5","WD6","WD7","WD8","WD9","WD10","WD11","WD12","WD13","WD14"],
+      icd:"L89.x Pressure ulcer · L97.x Non-pressure chronic ulcer · E11.622 Type 2 DM with other skin ulcer",
+      pt:"Complex / chronic wound — full microbiota + AMR profiling"},
   },
   defaultPreset:"core",
 },
@@ -297,13 +313,27 @@ derm:{
   },
   order:["DR1","DR2","DR3","DR4","DR5","DR6","DR7","DR8","DR9","DR10","DR11","DR12","DR13","DR14","DR15","DR16","DR17","DR18","DR19"],
   presets:{
-    candida:{l:"Candida (1w)",k:["DR11"],icd:"B37.0 · B37.2 · B37.3"},
-    hsv:{l:"HSV 1/2 (2w)",k:["DR2","DR3"],icd:"B00.1 · A60.0"},
-    derm_screen:{l:"Dermatophyte Screen (3w)",k:["DR13","DR18","DR19"],icd:"B35.0–B35.6"},
-    hsv_syph:{l:"HSV + Syphilis (3w)",k:["DR2","DR3","DR4"],icd:"A60.0 · A51.0 · A53.9"},
-    lesion:{l:"Lesion (5w)",k:["DR1","DR2","DR3","DR4","DR5"],icd:"A57 · B00.x · A51.x · B02.x"},
-    ssti:{l:"SSTI (5w)",k:["DR6","DR7","DR8","DR9","DR10"],icd:"L03.x · L02.x · A46"},
-    fungal21:{l:"Fungal Microbiota 21 (8w)",k:["DR12","DR13","DR14","DR15","DR16","DR17","DR18","DR19"],icd:"B35.1 · B48.8 · B36.x"},
+    candida:{l:"Candida (1w)",k:["DR11"],
+      icd:"B37.0 Candidal stomatitis · B37.2 Cutaneous candidiasis · B37.3 Candidiasis of vulva & vagina",
+      pt:"Suspected cutaneous or mucosal candidiasis — thrush, skin folds, diaper rash"},
+    hsv:{l:"HSV 1/2 (2w)",k:["DR2","DR3"],
+      icd:"B00.1 Herpesviral vesicular dermatitis · A60.0 Herpesviral infection of genitalia",
+      pt:"Vesicular / ulcerative lesion — suspected herpes simplex"},
+    derm_screen:{l:"Dermatophyte Screen (3w)",k:["DR13","DR18","DR19"],
+      icd:"B35.0–B35.6 Dermatophytosis (tinea capitis, corporis, pedis, cruris, unguium)",
+      pt:"Suspected fungal skin or nail infection — tinea, ringworm, onychomycosis"},
+    hsv_syph:{l:"HSV + Syphilis (3w)",k:["DR2","DR3","DR4"],
+      icd:"A60.0 Herpesviral infection of genitalia · A51.0 Primary genital syphilis · A53.9 Syphilis, unspecified",
+      pt:"Genital ulcer / lesion — STI workup (herpes + syphilis rule-out)"},
+    lesion:{l:"Lesion (5w)",k:["DR1","DR2","DR3","DR4","DR5"],
+      icd:"A57 Chancroid · B00.x Herpesviral infections · A51.x Early syphilis · B02.x Zoster",
+      pt:"Undifferentiated genital or skin lesion — broad infectious etiology workup"},
+    ssti:{l:"SSTI (5w)",k:["DR6","DR7","DR8","DR9","DR10"],
+      icd:"L03.x Cellulitis & acute lymphangitis · L02.x Cutaneous abscess / furuncle · A46 Erysipelas",
+      pt:"Acute bacterial skin / soft tissue infection — cellulitis, abscess, erysipelas"},
+    fungal21:{l:"Fungal Microbiota 21 (8w)",k:["DR12","DR13","DR14","DR15","DR16","DR17","DR18","DR19"],
+      icd:"B35.1 Tinea unguium · B48.8 Other specified mycoses · B36.x Other superficial mycoses",
+      pt:"Suspected deep or superficial fungal infection — comprehensive fungal profiling"},
   },
   defaultPreset:"lesion",
 },
@@ -413,9 +443,13 @@ function render(){
   h+=`<div class="st"><div class="lbl">TP (384)</div><div class="sv">${tp.s384}</div></div>`;
   h+='</div>';
 
-  // ICD-10 note (wound/derm presets carry ICD codes)
+  // ICD-10 + presenting patient note (wound/derm presets)
   if(curP !== 'custom' && P.presets[curP] && P.presets[curP].icd){
-    h+=`<div class="note blue"><b>ICD-10:</b> ${P.presets[curP].icd}</div>`;
+    const pr=P.presets[curP];
+    h+=`<div class="note blue">`;
+    if(pr.pt) h+=`<div style="margin-bottom:6px"><b>Presenting Patient:</b> ${pr.pt}</div>`;
+    h+=`<b>ICD-10:</b> ${pr.icd}`;
+    h+=`</div>`;
   }
 
   // Control MP note
