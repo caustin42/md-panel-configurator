@@ -177,29 +177,6 @@ gi:{
   },
   defaultPreset:"full",
 },
-lesion:{
-  title:"Lesion Panel",
-  sub:"Click wells to configure · QS5 / Bio-Rad Opus Platform · 5 targets + EC + PC/NC MP with H. ducreyi = 8 wells/column",
-  controlWell:"LS1",
-  fixedTP:{s96:12,s384:48},
-  wells:{
-    LS1:{lbl:"H. ducreyi",num:"1",hdr:"#dc2626",bdr:"#fca5a5",bg:"#fee2e2",
-      t:["H. ducreyi"]},
-    LS2:{lbl:"HSV-1",num:"2",hdr:"#2563eb",bdr:"#93c5fd",bg:"#dbeafe",
-      t:["HSV-1"]},
-    LS3:{lbl:"HSV-2",num:"3",hdr:"#0369a1",bdr:"#7dd3fc",bg:"#e0f2fe",
-      t:["HSV-2"]},
-    LS4:{lbl:"T. pallidum",num:"4",hdr:"#b91c1c",bdr:"#f87171",bg:"#fee2e2",
-      t:["T. pallidum"]},
-    LS5:{lbl:"VZV",num:"5",hdr:"#7c3aed",bdr:"#c4b5fd",bg:"#ede9fe",
-      t:["VZV"]},
-  },
-  order:["LS1","LS2","LS3","LS4","LS5"],
-  presets:{
-    full:{l:"Full Lesion Panel (5 wells)",k:["LS1","LS2","LS3","LS4","LS5"]},
-  },
-  defaultPreset:"full",
-},
 
 // ── WOUND ──
 wound:{
@@ -418,8 +395,8 @@ function render(){
 
   // Tabs
   h+='<div class="ptabs">';
-  ["respiratory","uti","vaginitis","gi","lesion","wound","derm"].forEach(p=>{
-    const labels={respiratory:"Respiratory",uti:"UTI",vaginitis:"Vaginitis",gi:"GI",lesion:"Lesion",wound:"Wound",derm:"Derm"};
+  ["respiratory","uti","vaginitis","gi","wound","derm"].forEach(p=>{
+    const labels={respiratory:"Respiratory",uti:"UTI",vaginitis:"Vaginitis",gi:"GI",wound:"Wound",derm:"Derm"};
     h+=`<button class="ptab ${panel===p?'a':''}" onclick="sw('${p}')">${labels[p]}</button>`;
   });
   h+='</div>';
