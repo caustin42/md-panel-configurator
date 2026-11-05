@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MD Panel Builder</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'IBM Plex Sans',system-ui,sans-serif;background:#f8fafc;color:#0f172a;padding:16px}
+.wrap{max-width:1100px;margin:0 auto}
+h1{font-size:22px;font-weight:800;line-height:1.2;margin:0 0 2px}
+.sub{font-size:12px;color:#64748b;margin:0 0 14px}
+.lbl{font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.8px}
+.ptabs{display:flex;gap:0;margin-bottom:16px;border-bottom:3px solid #e2e8f0;overflow-x:auto}
+.ptab{padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;border:none;background:none;color:#64748b;border-bottom:3px solid transparent;margin-bottom:-3px;transition:all .15s;font-family:inherit;white-space:nowrap}
+.ptab.a{color:#1e40af;border-bottom-color:#1e40af}.ptab:hover:not(.a){color:#0f172a}
+.brow{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.btn{padding:7px 14px;border-radius:10px;border:2px solid #e2e8f0;background:#fff;color:#475569;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;font-family:inherit}
+.btn.a{border-color:#1e40af;background:#1e40af;color:#fff}
+.btn.c{border-color:#f59e0b;background:#fffbeb;color:#92400e;cursor:default}
+.stats{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.st{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:8px 12px;flex:1 1 70px;min-width:70px}
+.sv{font-size:16px;font-weight:700;margin-top:2px}.sv.sm{font-size:12px}
+.wg{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px}
+.wc{background:#fff;border-radius:14px;border:2.5px solid #e2e8f0;overflow:hidden;min-width:180px;flex:1 1 180px;max-width:270px;cursor:pointer;transition:all .2s;position:relative;user-select:none}
+.wc.on{box-shadow:0 4px 16px rgba(0,0,0,.08);opacity:1}.wc.off{opacity:.38;box-shadow:none}.wc:hover{transform:translateY(-1px)}
+.wh{padding:8px 12px;display:flex;align-items:center;gap:7px;transition:background .2s}
+.wh .n{background:rgba(255,255,255,.2);color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700}
+.wh .nm{color:#fff;font-weight:700;font-size:12px;letter-spacing:.2px}
+.wb{padding:5px 12px 8px}
+.tr{display:flex;justify-content:space-between;align-items:center;padding:3px 0;font-size:11px;font-weight:500}
+.cpt-tag{font-size:8px;font-weight:700;padding:1px 5px;border-radius:4px;letter-spacing:.3px}
+.cpt-ok{background:#dcfce7;color:#166534}.cpt-nos{background:#fef2f2;color:#991b1b}.cpt-panel{background:#dbeafe;color:#1e40af}
+.td{position:absolute;top:8px;right:8px;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.td.on{background:#22c55e;box-shadow:0 0 0 3px rgba(34,197,94,.2);color:#fff;font-size:12px;font-weight:900}
+.td.off{background:#cbd5e1;color:#fff;font-size:10px;font-weight:700}
+.cbox{background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:12px 16px;margin-top:8px}
+.cbox .ct{font-size:12px;font-weight:700;color:#0c4a6e;margin-bottom:4px}
+.cbox .cd{font-size:11px;color:#0c4a6e;line-height:1.6}
+.note{border-radius:10px;padding:10px 14px;margin-bottom:10px;font-size:11px;line-height:1.5}
+.note b{font-weight:700}
+.note.warn{background:#fffbeb;border:1px solid #fde68a;color:#92400e}.note.warn b{color:#78350f}
+.note.green{background:#f0fdf4;border:1px solid #86efac;color:#14532d}.note.green b{color:#052e16}
+.note.red{background:#fef2f2;border:1px solid #fecaca;color:#991b1b}.note.red b{color:#7f1d1d}
+.note.blue{background:#eff6ff;border:1px solid #bfdbfe;color:#1e3a5f}.note.blue b{color:#1e3a5f}
+table.tp{width:100%;border-collapse:collapse;font-size:12px}
+table.tp th{text-align:center;padding:6px 8px;color:#64748b;font-weight:700;font-size:11px}
+table.tp th:first-child{text-align:left}
+table.tp td{text-align:center;padding:6px 8px}
+table.tp td:first-child{text-align:left;font-weight:600}
+table.tp thead tr{border-bottom:2px solid #e2e8f0}
+table.tp tbody tr{border-bottom:1px solid #f1f5f9}
+.tp-green{font-weight:700;color:#16a34a;font-size:14px}
+.tp-warn{color:#b45309;font-weight:600;font-size:10px}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<script>
+// ══════════════════════════════════════════════════════════════
+// PANEL DEFINITIONS
+// Each panel: wells{}, order[], presets{}, controlWell (key of
+// the well that PC/NC are multiplexed with), title, subtitle
+// ══════════════════════════════════════════════════════════════
+
+const PANELS = {
+// ── RESPIRATORY ──
+respiratory:{
+  title:"Respiratory Pathogen Panel Builder",
+  sub:"Click wells to toggle · QS5 / Bio-Rad Opus · 10 μL Rx",
+  controlWell:null, // Controls are dedicated, not MP
+  wells:{
+    CFR:{lbl:"COVID / Flu / RSV",num:"1",cat:"Combo",hdr:"#be185d",bdr:"#f9a8d4",bg:"#fce7f3",
+      t:[{n:"SARS-CoV-2",cpt:"87631-33"},{n:"Influenza A",cpt:"87631-33"},{n:"Influenza B",cpt:"87631-33"},{n:"RSV A/B",cpt:"87631-33"}]},
+    RP1:{lbl:"Resp Pathogens I",num:"2",cat:"Mixed",hdr:"#7c3aed",bdr:"#c4b5fd",bg:"#ede9fe",
+      t:[{n:"Adenovirus",cpt:"87631-33"},{n:"Rhinovirus/Enterovirus",cpt:"87631-33"},{n:"Mycoplasma pneumoniae",cpt:"87581"},{n:"HMPV",cpt:"87631-33"}]},
+    COV:{lbl:"Coronaviruses",num:"3",cat:"Viral",hdr:"#2563eb",bdr:"#93c5fd",bg:"#dbeafe",
+      t:[{n:"OC43",cpt:"87631-33"},{n:"229E",cpt:"87631-33"},{n:"HKU1",cpt:"87631-33"},{n:"NL63",cpt:"87631-33"}]},
+    PIV:{lbl:"Parainfluenza",num:"4",cat:"Viral",hdr:"#16a34a",bdr:"#86efac",bg:"#d1fae5",
+      t:[{n:"PIV1",cpt:"87631-33"},{n:"PIV2",cpt:"87631-33"},{n:"PIV3",cpt:"87631-33"},{n:"PIV4",cpt:"87631-33"}]},
+    BP:{lbl:"Bacterial Pathogens",num:"5",cat:"Bacterial",hdr:"#c2410c",bdr:"#fdba74",bg:"#fed7aa",
+      t:[{n:"Bordetella pertussis",cpt:"87798"},{n:"Streptococcus pyogenes",cpt:"87651"},{n:"Chlamydophila pneumoniae",cpt:"87486"},{n:"Streptococcus dysgalactiae",cpt:"87798"}]},
+    RP2:{lbl:"Resp Pathogens II",num:"6",cat:"Mixed",hdr:"#475569",bdr:"#cbd5e1",bg:"#e2e8f0",
+      t:[{n:"Bordetella parapertussis",cpt:"87798"},{n:"Legionella pneumophila",cpt:"87541"},{n:"Bocavirus",cpt:"87798"},{n:"Streptococcus pneumoniae",cpt:"87798"}]},
+  },
+  order:["CFR","RP1","COV","PIV","BP","RP2"],
+  presets:{
+    full:{l:"RPP Full (6 wells)",k:["CFR","RP1","COV","PIV","BP","RP2"]},
+    mini:{l:"RPP Mini (3 wells)",k:["CFR","RP1","BP"]},
+    combo:{l:"CFR Only (1 well)",k:["CFR"]},
+  },
+  defaultPreset:"mini",
+},
+
+// ── UTI ──
+uti:{
+  title:"UTI Panel Builder",
+  sub:"Click wells to toggle · QS5 / Bio-Rad Opus · 10 μL Rx",
+  controlWell:null,
+  wells:{
+    W1:{lbl:"Core UTI I",num:"1",cat:"ID",hdr:"#16a34a",bdr:"#86efac",bg:"#dcfce7",
+      t:[{n:"E. coli",cpt:"87798"},{n:"E. faecalis",cpt:"87798"},{n:"E. faecium",cpt:"87798"},{n:"S. agalactiae",cpt:"87798"},{n:"S. aureus",cpt:"87640"}]},
+    W2:{lbl:"Core UTI II",num:"2",cat:"ID",hdr:"#15803d",bdr:"#4ade80",bg:"#dcfce7",
+      t:[{n:"K. pneumoniae",cpt:"87798"},{n:"P. aeruginosa",cpt:"87798"},{n:"P. mirabilis",cpt:"87798"},{n:"S. saprophyticus",cpt:"87798"}]},
+    W3:{lbl:"Gram-Neg Extended I",num:"3",cat:"ID",hdr:"#2563eb",bdr:"#93c5fd",bg:"#dbeafe",
+      t:[{n:"A. baumannii",cpt:"87798"},{n:"K. aerogenes",cpt:"87798"},{n:"K. oxytoca",cpt:"87798"},{n:"M. morganii",cpt:"87798"}]},
+    W4:{lbl:"Gram-Neg Extended II",num:"4",cat:"ID",hdr:"#0369a1",bdr:"#7dd3fc",bg:"#e0f2fe",
+      t:[{n:"C. freundii",cpt:"87798"},{n:"E. cloacae",cpt:"87798"},{n:"S. marcescens",cpt:"87798"},{n:"P. vulgaris",cpt:"87798"}]},
+    W5:{lbl:"Candida (7 spp)",num:"5",cat:"Fungal",hdr:"#b45309",bdr:"#fde68a",bg:"#fef3c7",
+      t:[{n:"C. albicans",cpt:"87481"},{n:"C. dubliniensis",cpt:"87481"},{n:"C. lusitaniae",cpt:"87481"},{n:"C. tropicalis",cpt:"87481"},{n:"C. glabrata",cpt:"87481"},{n:"C. parapsilosis",cpt:"87481"},{n:"C. krusei",cpt:"87481"}]},
+    W6:{lbl:"STI / Urogenital",num:"6",cat:"STI",hdr:"#be185d",bdr:"#f9a8d4",bg:"#fce7f3",
+      t:[{n:"CT",cpt:"87491"},{n:"NG",cpt:"87591"},{n:"T. vaginalis",cpt:"87661"},{n:"M. genitalium",cpt:"87563"},{n:"EC (Endo Control)",cpt:""}]},
+    W7:{lbl:"Urogenital / Atypical",num:"7",cat:"Atypical",hdr:"#e11d48",bdr:"#fda4af",bg:"#ffe4e6",
+      t:[{n:"U. urealyticum",cpt:"87798"},{n:"M. hominis",cpt:"87798"},{n:"Providencia",cpt:"87798"}]},
+    W8:{lbl:"Low-Prevalence ID",num:"8",cat:"ID",hdr:"#4f46e5",bdr:"#a5b4fc",bg:"#e0e7ff",
+      t:[{n:"CoNS",cpt:"87798"},{n:"A. urinae",cpt:"87798"},{n:"C. urealyticum",cpt:"87798"}]},
+    W9:{lbl:"AMR – Glycopeptide/FQ/Fosfo",num:"9",cat:"AMR",hdr:"#dc2626",bdr:"#fca5a5",bg:"#fee2e2",
+      t:[{n:"vanA",cpt:"87500"},{n:"vanB",cpt:"87500"},{n:"qnrABS",cpt:"87798"},{n:"fosA",cpt:"87798"}]},
+    W10:{lbl:"AMR – ESBL + Carb",num:"10",cat:"AMR",hdr:"#b91c1c",bdr:"#f87171",bg:"#fee2e2",
+      t:[{n:"CTX-M (Groups 1 & 9)",cpt:"87798"},{n:"KPC",cpt:"87798"},{n:"IMP",cpt:"87798"}]},
+    W11:{lbl:"AMR – Carb/MBL",num:"11",cat:"AMR",hdr:"#991b1b",bdr:"#ef4444",bg:"#fee2e2",
+      t:[{n:"NDM",cpt:"87798"},{n:"VIM",cpt:"87798"},{n:"OXA",cpt:"87798"}]},
+    W12:{lbl:"AMR – TMP/Tet",num:"12",cat:"AMR",hdr:"#dc2626",bdr:"#fca5a5",bg:"#fee2e2",
+      t:[{n:"dfrA",cpt:"87798"},{n:"tetABMS",cpt:"87798"}]},
+    W13:{lbl:"AMR – AmpC + ESBL",num:"13",cat:"AMR",hdr:"#b91c1c",bdr:"#f87171",bg:"#fee2e2",
+      t:[{n:"ampC",cpt:"87798"},{n:"SHV",cpt:"87798"},{n:"TEM",cpt:"87798"}]},
+    W14:{lbl:"AMR – MRSA/Sulfonamide",num:"14",cat:"AMR",hdr:"#991b1b",bdr:"#ef4444",bg:"#fee2e2",
+      t:[{n:"mecA",cpt:"87641"},{n:"sul1/2/3",cpt:"87798"}]},
+  },
+  order:["W1","W2","W3","W4","W5","W6","W7","W8","W9","W10","W11","W12","W13","W14"],
+  presets:{
+    uti65:{l:"UTI 65 (14 wells)",k:["W1","W2","W3","W4","W5","W6","W7","W8","W9","W10","W11","W12","W13","W14"]},
+    lite:{l:"UTI Lite (6 wells)",k:["W1","W2","W9","W10","W12","W13"]},
+    uc_sti:{l:"UC UTI w/ STI (8 wells)",k:["W1","W2","W5","W6","W9","W10","W11","W12"]},
+    uc_ns:{l:"UC UTI No STI (8 wells)",k:["W1","W2","W5","W9","W10","W11","W12","W14"]},
+  },
+  defaultPreset:"uti65",
+},
+
+// ── VAGINITIS ──
+vaginitis:{
+  title:"Vaginitis Panel Builder",
+  sub:"Click wells to toggle · QS5 / Bio-Rad Opus · Controls MP with Meg Type 1 (Well 5)",
+  controlWell:"V5", // PC/NC multiplexed with Meg Type 1
+  wells:{
+    V1:{lbl:"BV Markers I",num:"1",cat:"BV",hdr:"#7c3aed",bdr:"#c4b5fd",bg:"#ede9fe",
+      t:[{n:"BVAB-2",cpt:"87798"},{n:"Megasphaera Type 2",cpt:"87798"}]},
+    V2:{lbl:"BV Markers II",num:"2",cat:"BV",hdr:"#6d28d9",bdr:"#a78bfa",bg:"#ede9fe",
+      t:[{n:"A. vaginae",cpt:"87798"},{n:"G. vaginalis",cpt:"87511"},{n:"M. curtisii",cpt:"87798"}]},
+    V3:{lbl:"Candida (7 spp)",num:"3",cat:"Fungal",hdr:"#b45309",bdr:"#fde68a",bg:"#fef3c7",
+      t:[{n:"C. albicans",cpt:"87481"},{n:"C. dubliniensis",cpt:"87481"},{n:"C. glabrata",cpt:"87481"},{n:"C. krusei",cpt:"87481"},{n:"C. lusitaniae",cpt:"87481"},{n:"C. parapsilosis",cpt:"87481"},{n:"C. tropicalis",cpt:"87481"}]},
+    V4:{lbl:"STI / Core",num:"4",cat:"STI",hdr:"#be185d",bdr:"#f9a8d4",bg:"#fce7f3",
+      t:[{n:"C. trachomatis",cpt:"87491"},{n:"N. gonorrhoeae",cpt:"87591"},{n:"T. vaginalis",cpt:"87661"},{n:"EC (Endo Control)",cpt:""}]},
+    V5:{lbl:"Megasphaera Type 1",num:"5",cat:"BV",hdr:"#9333ea",bdr:"#c084fc",bg:"#f3e8ff",
+      t:[{n:"Megasphaera Type 1",cpt:"87798"}]},
+    V6:{lbl:"Urogenital / Mycoplasma",num:"6",cat:"Atypical",hdr:"#e11d48",bdr:"#fda4af",bg:"#ffe4e6",
+      t:[{n:"M. genitalium",cpt:"87563"},{n:"M. hominis",cpt:"87798"},{n:"U. urealyticum",cpt:"87798"}]},
+  },
+  order:["V1","V2","V3","V4","V5","V6"],
+  presets:{
+    full:{l:"Full Vag Panel (6 wells)",k:["V1","V2","V3","V4","V5","V6"]},
+  },
+  defaultPreset:"full",
+},
+
+// ── GI ──
+gi:{
+  title:"GI Simplicity Panel Builder",
+  sub:"Click wells to toggle · QS5 / Bio-Rad Opus · Dedicated PC + NC wells · With Cyclospora: breakaway in pairs",
+  controlWell:null,
+  fixedTP7:{s96:12,s384:48}, // PC/NC multiplexed with ETEC/EIEC/STEC
+  wells:{
+    G1:{lbl:"C. difficile",num:"1",cat:"Toxin",hdr:"#dc2626",bdr:"#fca5a5",bg:"#fee2e2",
+      t:[{n:"C. diff tcdA",cpt:"GIP"},{n:"C. diff tcdB",cpt:"GIP"},{n:"EC (Endo Control)",cpt:""}]},
+    G2:{lbl:"ETEC / EIEC / STEC",num:"2",cat:"Bacterial",hdr:"#b91c1c",bdr:"#f87171",bg:"#fee2e2",
+      t:[{n:"ETEC",cpt:"GIP"},{n:"EIEC",cpt:"GIP"},{n:"STEC",cpt:"GIP"}]},
+    G3:{lbl:"Parasites",num:"3",cat:"Parasitic",hdr:"#b45309",bdr:"#fde68a",bg:"#fef3c7",
+      t:[{n:"Cryptosporidium spp.",cpt:"GIP"},{n:"E. histolytica",cpt:"GIP"},{n:"G. lamblia",cpt:"GIP"}]},
+    G4:{lbl:"Bacterial Enteric",num:"4",cat:"Bacterial",hdr:"#c2410c",bdr:"#fdba74",bg:"#fed7aa",
+      t:[{n:"Campylobacter spp.",cpt:"GIP"},{n:"Salmonella spp.",cpt:"GIP"},{n:"Enterovirus (O670)",cpt:"GIP"},{n:"Vibrio spp.",cpt:"GIP"}]},
+    G5:{lbl:"Viral Enteric",num:"5",cat:"Viral",hdr:"#2563eb",bdr:"#93c5fd",bg:"#dbeafe",
+      t:[{n:"Adenovirus (O670)",cpt:"GIP"},{n:"Rotavirus",cpt:"GIP"},{n:"Astrovirus",cpt:"GIP"}]},
+    G6:{lbl:"Norovirus",num:"6",cat:"Viral",hdr:"#0369a1",bdr:"#7dd3fc",bg:"#e0f2fe",
+      t:[{n:"Norovirus",cpt:"GIP"}]},
+    G7:{lbl:"Cyclospora",num:"7",cat:"Parasitic",hdr:"#15803d",bdr:"#4ade80",bg:"#dcfce7",
+      t:[{n:"Cyclospora cayetanensis",cpt:"GIP"}]},
+  },
+  order:["G1","G2","G3","G4","G5","G6","G7"],
+  presets:{
+    full:{l:"GI Simplicity (6 wells)",k:["G1","G2","G3","G4","G5","G6"]},
+    cyclo:{l:"GI + Cyclospora (7 wells)",k:["G1","G2","G3","G4","G5","G6","G7"]},
+  },
+  defaultPreset:"full",
+},
+
+
+// ── WOUND ──
+wound:{
+  title:"Wound Panel Builder",
+  sub:"Click wells to toggle · QS5 / Bio-Rad Opus · Skin Microbiota 63 Plate · Dedicated PC + NC",
+  controlWell:null,
+  wells:{
+    WD1:{lbl:"Core I",num:"1",cat:"ID",hdr:"#16a34a",bdr:"#86efac",bg:"#dcfce7",
+      t:[{n:"S. aureus",cpt:"87640"},{n:"E. coli",cpt:"87798"},{n:"E. faecalis",cpt:"87798"},{n:"E. faecium",cpt:"87798"},{n:"S. agalactiae",cpt:"87798"}]},
+    WD2:{lbl:"Core II",num:"2",cat:"ID",hdr:"#15803d",bdr:"#4ade80",bg:"#dcfce7",
+      t:[{n:"K. pneumoniae",cpt:"87798"},{n:"P. aeruginosa",cpt:"87798"},{n:"P. mirabilis",cpt:"87798"},{n:"S. saprophyticus",cpt:"87798"}]},
+    WD3:{lbl:"Gram-Neg Extended I",num:"3",cat:"ID",hdr:"#2563eb",bdr:"#93c5fd",bg:"#dbeafe",
+      t:[{n:"A. baumannii",cpt:"87798"},{n:"K. aerogenes",cpt:"87798"},{n:"K. oxytoca",cpt:"87798"},{n:"M. morganii",cpt:"87798"}]},
+    WD4:{lbl:"Gram-Neg Extended II",num:"4",cat:"ID",hdr:"#0369a1",bdr:"#7dd3fc",bg:"#e0f2fe",
+      t:[{n:"C. freundii",cpt:"87798"},{n:"E. cloacae",cpt:"87798"},{n:"S. marcescens",cpt:"87798"},{n:"P. vulgaris",cpt:"87798"}]},
+    WD5:{lbl:"Candida (7 spp)",num:"5",cat:"Fungal",hdr:"#b45309",bdr:"#fde68a",bg:"#fef3c7",
+      t:[{n:"C. albicans",cpt:"87481"},{n:"C. dubliniensis",cpt:"87481"},{n:"C. lusitaniae",cpt:"87481"},{n:"C. tropicalis",cpt:"87481"},{n:"C. glabrata",cpt:"87481"},{n:"C. parapsilosis",cpt:"87481"},{n:"C. krusei",cpt:"87481"}]},
+    WD6:{lbl:"Wound Pathogens",num:"6",cat:"ID",hdr:"#be185d",bdr:"#f9a8d4",bg:"#fce7f3",
+      t:[{n:"S. pyogenes",cpt:"87651"},{n:"P. rettgeri",cpt:"87798"},{n:"P. stuartii",cpt:"87798"},{n:"VZV",cpt:"87798"}]},
+    WD7:{lbl:"Low-Prevalence ID",num:"7",cat:"ID",hdr:"#4f46e5",bdr:"#a5b4fc",bg:"#e0e7ff",
+      t:[{n:"CoNS",cpt:"87798"},{n:"A. urinae",cpt:"87798"},{n:"C. urealyticum",cpt:"87798"}]},
+    WD8:{lbl:"AMR – vanA/vanB",num:"8",cat:"AMR",hdr:"#dc2626",bdr:"#fca5a5",bg:"#fee2e2",
+      t:[{n:"vanA",cpt:"87500"},{n:"vanB",cpt:"87500"}]},
+    WD9:{lbl:"AMR – mecA/Sulfonamide",num:"9",cat:"AMR",hdr:"#b91c1c",bdr:"#f87171",bg:"#fee2e2",
+      t:[{n:"mecA",cpt:"87641"},{n:"sul1/2/3",cpt:"87798"}]},
+    WD10:{lbl:"AMR – CTX-M/KPC/IMP",num:"10",cat:"AMR",hdr:"#991b1b",bdr:"#ef4444",bg:"#fee2e2",
+      t:[{n:"CTX-M (Groups 1 & 9)",cpt:"87798"},{n:"KPC",cpt:"87798"},{n:"IMP",cpt:"87798"}]},
+    WD11:{lbl:"AMR – NDM/VIM/OXA",num:"11",cat:"AMR",hdr:"#dc2626",bdr:"#fca5a5",bg:"#fee2e2",
+      t:[{n:"NDM",cpt:"87798"},{n:"VIM",cpt:"87798"},{n:"OXA",cpt:"87798"}]},
+    WD12:{lbl:"AMR – TMP/Tet",num:"12",cat:"AMR",hdr:"#b91c1c",bdr:"#f87171",bg:"#fee2e2",
+      t:[{n:"dfrA",cpt:"87798"},{n:"tetABMS",cpt:"87798"}]},
+    WD13:{lbl:"AMR – AmpC/ESBL",num:"13",cat:"AMR",hdr:"#991b1b",bdr:"#ef4444",bg:"#fee2e2",
+      t:[{n:"ampC",cpt:"87798"},{n:"SHV",cpt:"87798"},{n:"TEM",cpt:"87798"}]},
+    WD14:{lbl:"AMR – Macrolide",num:"14",cat:"AMR",hdr:"#dc2626",bdr:"#fca5a5",bg:"#fee2e2",
+      t:[{n:"ermABC",cpt:"87798"},{n:"mefA",cpt:"87798"}]},
+  },
+  order:["WD1","WD2","WD3","WD4","WD5","WD6","WD7","WD8","WD9","WD10","WD11","WD12","WD13","WD14"],
+  presets:{
+    mrsa:{l:"MRSA Screen (2w)",k:["WD1","WD9"],
+      icd:"Z22.322 Carrier of MRSA · Z11.59 Screening for other bacterial diseases",
+      pt:"Pre-op / admission MRSA colonization screening"},
+    vre:{l:"VRE Screen (2w)",k:["WD1","WD8"],
+      icd:"Z22.8 Carrier of other infectious diseases · Z11.59 Screening for other bacterial diseases",
+      pt:"ICU / transplant / long-term care VRE colonization screening"},
+    staph:{l:"Staph/Strep Quick (3w)",k:["WD1","WD6","WD9"],
+      icd:"L03.x Cellulitis & acute lymphangitis · L02.x Cutaneous abscess / furuncle · L01.0 Impetigo",
+      pt:"Acute skin / soft tissue infection — cellulitis, abscess, impetigo"},
+    gramneg:{l:"Gram-Neg Wound (2w)",k:["WD2","WD3"],
+      icd:"T30.x Burn / corrosion, unspecified · E11.621 Type 2 DM with foot ulcer · L97.x Non-pressure chronic ulcer of lower limb",
+      pt:"Chronic / diabetic wound with suspected gram-negative infection"},
+    core:{l:"Wound Core (5w)",k:["WD1","WD2","WD6","WD8","WD9"],
+      icd:"T79.3 Post-traumatic wound infection · L08.9 Local infection of skin / subcutaneous tissue, unspecified",
+      pt:"Traumatic or post-surgical wound infection — general workup"},
+    fungal:{l:"Wound + Fungal (6w)",k:["WD1","WD2","WD5","WD6","WD8","WD9"],
+      icd:"L97.x Non-pressure chronic ulcer of lower limb · B37.2 Cutaneous candidiasis",
+      pt:"Non-healing chronic wound with suspected fungal co-infection"},
+    ssi:{l:"SSI (10w)",k:["WD1","WD2","WD3","WD4","WD5","WD6","WD8","WD9","WD10","WD11"],
+      icd:"T81.41A–49A Infection following a procedure · T81.30XA Disruption of operation wound, NEC · Z96.x Presence of functional implant",
+      pt:"Surgical site infection (SSI) — intra-operative tissue/fluid culture or post-operative wound workup"},
+    full:{l:"Skin Microbiota 63 (14w)",k:["WD1","WD2","WD3","WD4","WD5","WD6","WD7","WD8","WD9","WD10","WD11","WD12","WD13","WD14"],
+      icd:"L89.x Pressure ulcer · L97.x Non-pressure chronic ulcer · E11.622 Type 2 DM with other skin ulcer",
+      pt:"Complex / chronic wound — full microbiota + AMR profiling"},
+  },
+  defaultPreset:"core",
+},
+
+// ── DERM ──
+derm:{
+  title:"Dermatology Panel Builder",
+  sub:"Click wells to toggle · QS5 / Bio-Rad Opus · Lesion + Fungal 21 + Skin 63 Plates · Dedicated PC + NC",
+  controlWell:null,
+  wells:{
+    DR1:{lbl:"H. ducreyi",num:"1",cat:"Bacterial",hdr:"#dc2626",bdr:"#fca5a5",bg:"#fee2e2",
+      t:[{n:"H. ducreyi",cpt:"87798"}]},
+    DR2:{lbl:"HSV-1",num:"2",cat:"Viral",hdr:"#2563eb",bdr:"#93c5fd",bg:"#dbeafe",
+      t:[{n:"HSV-1",cpt:"87529"}]},
+    DR3:{lbl:"HSV-2",num:"3",cat:"Viral",hdr:"#0369a1",bdr:"#7dd3fc",bg:"#e0f2fe",
+      t:[{n:"HSV-2",cpt:"87529"}]},
+    DR4:{lbl:"T. pallidum",num:"4",cat:"Bacterial",hdr:"#b91c1c",bdr:"#f87171",bg:"#fee2e2",
+      t:[{n:"T. pallidum",cpt:"87798"}]},
+    DR5:{lbl:"VZV",num:"5",cat:"Viral",hdr:"#7c3aed",bdr:"#c4b5fd",bg:"#ede9fe",
+      t:[{n:"VZV",cpt:"87798"}]},
+    DR6:{lbl:"Core I",num:"6",cat:"ID",hdr:"#16a34a",bdr:"#86efac",bg:"#dcfce7",
+      t:[{n:"S. aureus",cpt:"87640"},{n:"E. coli",cpt:"87798"},{n:"E. faecalis",cpt:"87798"},{n:"E. faecium",cpt:"87798"},{n:"S. agalactiae",cpt:"87798"}]},
+    DR7:{lbl:"Core II",num:"7",cat:"ID",hdr:"#15803d",bdr:"#4ade80",bg:"#dcfce7",
+      t:[{n:"K. pneumoniae",cpt:"87798"},{n:"P. aeruginosa",cpt:"87798"},{n:"P. mirabilis",cpt:"87798"},{n:"S. saprophyticus",cpt:"87798"}]},
+    DR8:{lbl:"Wound Pathogens",num:"8",cat:"ID",hdr:"#be185d",bdr:"#f9a8d4",bg:"#fce7f3",
+      t:[{n:"S. pyogenes",cpt:"87651"},{n:"P. rettgeri",cpt:"87798"},{n:"P. stuartii",cpt:"87798"}]},
+    DR9:{lbl:"AMR – vanA/vanB",num:"9",cat:"AMR",hdr:"#dc2626",bdr:"#fca5a5",bg:"#fee2e2",
+      t:[{n:"vanA",cpt:"87500"},{n:"vanB",cpt:"87500"}]},
+    DR10:{lbl:"AMR – mecA/Sulfonamide",num:"10",cat:"AMR",hdr:"#b91c1c",bdr:"#f87171",bg:"#fee2e2",
+      t:[{n:"mecA",cpt:"87641"},{n:"sul1/2/3",cpt:"87798"}]},
+    DR11:{lbl:"Candida (7 spp)",num:"11",cat:"Fungal",hdr:"#b45309",bdr:"#fde68a",bg:"#fef3c7",
+      t:[{n:"C. albicans",cpt:"87481"},{n:"C. dubliniensis",cpt:"87481"},{n:"C. lusitaniae",cpt:"87481"},{n:"C. tropicalis",cpt:"87481"},{n:"C. glabrata",cpt:"87481"},{n:"C. parapsilosis",cpt:"87481"},{n:"C. krusei",cpt:"87481"}]},
+    DR12:{lbl:"Alternaria / Aspergillus",num:"12",cat:"Fungal",hdr:"#854d0e",bdr:"#fbbf24",bg:"#fef9c3",
+      t:[{n:"Alternaria spp.",cpt:"87798"},{n:"Aspergillus spp.",cpt:"87798"}]},
+    DR13:{lbl:"Epidermophyton / Scedosporium",num:"13",cat:"Fungal",hdr:"#a16207",bdr:"#facc15",bg:"#fef9c3",
+      t:[{n:"E. floccosum",cpt:"87798"},{n:"S. dimidiatum",cpt:"87798"}]},
+    DR14:{lbl:"Fusarium / Curvularia",num:"14",cat:"Fungal",hdr:"#ca8a04",bdr:"#fde047",bg:"#fefce8",
+      t:[{n:"Fusarium spp.",cpt:"87798"},{n:"Curvularia spp.",cpt:"87798"}]},
+    DR15:{lbl:"Candida (alb/glab/krus)",num:"15",cat:"Fungal",hdr:"#b45309",bdr:"#fde68a",bg:"#fef3c7",
+      t:[{n:"C. albicans",cpt:"87481"},{n:"C. glabrata",cpt:"87481"},{n:"C. krusei",cpt:"87481"}]},
+    DR16:{lbl:"Candida (trop/parap)",num:"16",cat:"Fungal",hdr:"#92400e",bdr:"#f59e0b",bg:"#fef3c7",
+      t:[{n:"C. tropicalis",cpt:"87481"},{n:"C. parapsilosis",cpt:"87481"}]},
+    DR17:{lbl:"Cryptococcus / Trichosporon",num:"17",cat:"Fungal",hdr:"#78350f",bdr:"#d97706",bg:"#fffbeb",
+      t:[{n:"Cryptococcus spp.",cpt:"87798"},{n:"Trichosporon spp.",cpt:"87798"}]},
+    DR18:{lbl:"Dermatophytes / Malassezia",num:"18",cat:"Fungal",hdr:"#854d0e",bdr:"#fbbf24",bg:"#fef9c3",
+      t:[{n:"T. rubrum",cpt:"87798"},{n:"Malassezia spp.",cpt:"87798"},{n:"T. mentagrophytes",cpt:"87798"}]},
+    DR19:{lbl:"Fungal Mixed / mecA",num:"19",cat:"Mixed",hdr:"#a16207",bdr:"#facc15",bg:"#fef9c3",
+      t:[{n:"M. guilliermondii",cpt:"87798"},{n:"M. canis",cpt:"87798"},{n:"S. strictum",cpt:"87798"},{n:"P. aeruginosa",cpt:"87798"},{n:"mecA",cpt:"87641"}]},
+  },
+  order:["DR1","DR2","DR3","DR4","DR5","DR6","DR7","DR8","DR9","DR10","DR11","DR12","DR13","DR14","DR15","DR16","DR17","DR18","DR19"],
+  presets:{
+    candida:{l:"Candida (1w)",k:["DR11"],
+      icd:"B37.0 Candidal stomatitis · B37.2 Cutaneous candidiasis · B37.3 Candidiasis of vulva & vagina",
+      pt:"Suspected cutaneous or mucosal candidiasis — thrush, skin folds, diaper rash"},
+    hsv:{l:"HSV 1/2 (2w)",k:["DR2","DR3"],
+      icd:"B00.1 Herpesviral vesicular dermatitis · A60.0 Herpesviral infection of genitalia",
+      pt:"Vesicular / ulcerative lesion — suspected herpes simplex"},
+    derm_screen:{l:"Dermatophyte Screen (3w)",k:["DR13","DR18","DR19"],
+      icd:"B35.0–B35.6 Dermatophytosis (tinea capitis, corporis, pedis, cruris, unguium)",
+      pt:"Suspected fungal skin or nail infection — tinea, ringworm, onychomycosis"},
+    hsv_syph:{l:"HSV + Syphilis (3w)",k:["DR2","DR3","DR4"],
+      icd:"A60.0 Herpesviral infection of genitalia · A51.0 Primary genital syphilis · A53.9 Syphilis, unspecified",
+      pt:"Genital ulcer / lesion — STI workup (herpes + syphilis rule-out)"},
+    lesion:{l:"Lesion (5w)",k:["DR1","DR2","DR3","DR4","DR5"],
+      icd:"A57 Chancroid · B00.x Herpesviral infections · A51.x Early syphilis · B02.x Zoster",
+      pt:"Undifferentiated genital or skin lesion — broad infectious etiology workup"},
+    ssti:{l:"SSTI (5w)",k:["DR6","DR7","DR8","DR9","DR10"],
+      icd:"L03.x Cellulitis & acute lymphangitis · L02.x Cutaneous abscess / furuncle · A46 Erysipelas",
+      pt:"Acute bacterial skin / soft tissue infection — cellulitis, abscess, erysipelas"},
+    fungal21:{l:"Fungal Microbiota 21 (8w)",k:["DR12","DR13","DR14","DR15","DR16","DR17","DR18","DR19"],
+      icd:"B35.1 Tinea unguium · B48.8 Other specified mycoses · B36.x Other superficial mycoses",
+      pt:"Suspected deep or superficial fungal infection — comprehensive fungal profiling"},
+  },
+  defaultPreset:"lesion",
+},
+};
+
+// ══════════════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════════════
+let panel="respiratory";
+let active=new Set(PANELS.respiratory.presets.mini.k);
+
+// ══════════════════════════════════════════════════════════════
+// THROUGHPUT
+// ══════════════════════════════════════════════════════════════
+// 96-well = 8 rows × 12 columns. 384-well = 4× throughput of 96.
+// Column-based packing: each column has 8 rows.
+// Per column: pack samples (wCount wells each) + 2 control wells (1 PC + 1 NC).
+// samples_per_col = floor((8 - 2) / wCount) = floor(6 / wCount)
+// When wCount <= 6: fits in columns. samples_96 = samples_per_col × 12
+// When wCount > 6: sample spans rows beyond what fits with controls in 1 col.
+//   Use known lookup for these (UTI panels with 8, 14 wells).
+// When controls are MP with an active well: controls are "free" — no 2-well overhead.
+//   samples_per_col = floor(8 / wCount), samples_96 = samples_per_col × 12
+// 384-well = 96-well throughput × 4
+
+// Known overrides for panels where column math doesn't apply cleanly
+const TP_OVERRIDE = {};
+
+function getThroughput(wCount, ctrlFree){
+  if(wCount === 0) return {s96:0, s384:0};
+  
+  if(ctrlFree){
+    const spc = Math.floor(8 / wCount);
+    const s96 = spc * 12;
+    return {s96, s384: s96 * 4};
+  }
+  
+  if(wCount <= 6){
+    // Column-packed: floor(6/wCount) samples + 2 ctrl per column
+    const spc = Math.floor(6 / wCount);
+    const s96 = spc * 12;
+    return {s96, s384: s96 * 4};
+  }
+  
+  if(8 % wCount === 0){
+    // Non-breakaway: 2 controls per plate
+    const s96 = Math.floor((96 - 2) / wCount);
+    const s384 = Math.floor((384 - 2) / wCount);
+    return {s96, s384};
+  }
+  
+  // True breakaway: each sample gets own PC + NC
+  const s96 = Math.floor(96 / (wCount + 2));
+  const s384 = Math.floor(384 / (wCount + 2));
+  return {s96, s384};
+}
+
+// ══════════════════════════════════════════════════════════════
+// CPT HELPERS
+// ══════════════════════════════════════════════════════════════
+const AMR_KW=["vanA","vanB","qnrABS","fosA","CTX-M","KPC","IMP","NDM","VIM","OXA","dfrA","tetABMS","ampC","SHV","TEM","mecA","sul"];
+function isAMR(t){return AMR_KW.some(a=>t.toLowerCase().includes(a.toLowerCase()));}
+
+function getCPT(keys){
+  const P=PANELS[panel];
+  if(panel==="respiratory"){
+    const hasCFR=keys.includes("CFR");
+    const otherRVP=["COV","RP1","PIV"].some(k=>keys.includes(k));
+    const cfrOnly=hasCFR&&keys.length===1;
+    let vCount=0;
+    keys.forEach(k=>{
+      if(k==="BP")return;
+      if(k==="RP2"){vCount+=1;return;}
+      const w=P.wells[k];if(!w)return;
+      w.t.forEach(x=>{if(x.cpt&&(x.cpt==="87631-33"||x.cpt==="87637"))vCount++;});
+    });
+    const p=[];
+    if(cfrOnly){p.push("87637");}
+    else if(vCount>0){
+      if(vCount>=12)p.push("87633");else if(vCount>=6)p.push("87632");else if(vCount>=3)p.push("87631");else p.push("87631");
+    }
+    return p.join(" + ")||"—";
+  }
+  if(panel==="uti"){
+    // UTI: individual organism/AMR codes billed separately
+    const codes={};
+    keys.forEach(k=>{const v=P.wells[k];if(!v)return;
+      v.t.forEach(x=>{
+        if(!x.cpt||x.cpt==="")return; // skip EC
+        if(!codes[x.cpt])codes[x.cpt]=0;
+        codes[x.cpt]++;
+      });
+    });
+    const parts=[];
+    for(const[c,n] of Object.entries(codes)){
+      parts.push(n>1?c+"×"+n:c);
+    }
+    return parts.join(" + ")||"—";
+  }
+  if(panel==="vaginitis"){
+    const codes={};
+    keys.forEach(k=>{const v=P.wells[k];if(!v)return;
+      v.t.forEach(x=>{
+        if(!x.cpt||x.cpt==="")return;
+        if(!codes[x.cpt])codes[x.cpt]=0;
+        codes[x.cpt]++;
+      });
+    });
+    const parts=[];
+    for(const[c,n] of Object.entries(codes)){
+      parts.push(n>1?c+"×"+n:c);
+    }
+    return parts.join(" + ")||"—";
+  }
+  if(panel==="gi"){
+    // GI: always bill 87505 — see billing note for 87506/87507 med nec issues
+    let tCount=0;
+    keys.forEach(k=>{const v=P.wells[k];if(!v)return;
+      v.t.forEach(x=>{if(!x.n.includes("EC ("))tCount++;});
+    });
+    if(tCount>0){
+      let code="87505*";
+      if(tCount>=12) code="87505* (87507 w/ med nec)";
+      else if(tCount>=6) code="87505* (87506 w/ med nec)";
+      return code;
+    }
+    return "—";
+  }
+  if(panel==="lesion"||panel==="wound"||panel==="derm"){
+    // Individual organism/AMR codes billed separately (same pattern as UTI)
+    const codes={};
+    keys.forEach(k=>{const v=P.wells[k];if(!v)return;
+      v.t.forEach(x=>{
+        if(!x.cpt||x.cpt==="")return;
+        if(!codes[x.cpt])codes[x.cpt]=0;
+        codes[x.cpt]++;
+      });
+    });
+    const parts=[];
+    for(const[c,n] of Object.entries(codes)){
+      parts.push(n>1?c+"×"+n:c);
+    }
+    return parts.join(" + ")||"—";
+  }
+  return "—";
+}
+
+// ══════════════════════════════════════════════════════════════
+// RENDER
+// ══════════════════════════════════════════════════════════════
+function render(){
+  const P=PANELS[panel];
+  const keys=P.order.filter(k=>active.has(k));
+  const tCount=keys.reduce((s,k)=>s+(P.wells[k]?P.wells[k].t.length:0),0);
+  const wCount=keys.length;
+  // Control logic: are controls "free" (MP with an active well)?
+  const ctrlWell=P.controlWell;
+  const ctrlFree=ctrlWell?active.has(ctrlWell):false;
+  const ctrlNote=ctrlWell?P.wells[ctrlWell]?.lbl:"";
+
+  // Throughput
+  const tp=wCount>0?(P.fixedTP||(P.fixedTP7&&wCount===7?P.fixedTP7:null)||getThroughput(wCount,ctrlFree)):{s96:0,s384:0};
+
+  // Preset detect
+  let curP="custom";
+  for(const[pk,pv] of Object.entries(P.presets)){
+    if(pv.k.length===keys.length&&pv.k.every(x=>active.has(x))){curP=pk;break;}
+  }
+
+  const cpt=getCPT(keys);
+
+  // UTI STI logic
+  const hasSTI=panel==="uti"&&active.has("W6");
+  const noSTI=panel==="uti"&&!active.has("W6")&&wCount>0;
+
+  // Resp CFR logic
+  const otherRVP=panel==="respiratory"&&["COV","RP1","PIV"].some(k=>active.has(k));
+
+  let h='';
+
+  // Tabs
+  h+='<div class="ptabs">';
+  ["respiratory","uti","vaginitis","gi","wound","derm"].forEach(p=>{
+    const labels={respiratory:"Respiratory",uti:"UTI",vaginitis:"Vaginitis",gi:"GI",wound:"Wound",derm:"Derm"};
+    h+=`<button class="ptab ${panel===p?'a':''}" onclick="sw('${p}')">${labels[p]}</button>`;
+  });
+  h+='</div>';
+
+  h+=`<div class="lbl" style="margin-bottom:4px">MOLECULAR DESIGNS</div>`;
+  h+=`<h1>${P.title}</h1>`;
+  h+=`<p class="sub">${P.sub}</p>`;
+
+  // Presets
+  h+='<div class="brow">';
+  for(const[pk,pv] of Object.entries(P.presets)){
+    h+=`<button class="btn ${curP===pk?'a':''}" onclick="ap('${pk}')">${pv.l}</button>`;
+  }
+  h+=`<button class="btn ${curP==='custom'?'c':''}" onclick="clearAll()">Custom</button>`;
+  h+='</div>';
+
+  // Stats
+  h+='<div class="stats">';
+  h+=stat("Target Wells",wCount)+stat("Targets",tCount);
+  h+=`<div class="st"><div class="lbl">TP (96)</div><div class="sv">${tp.s96}</div></div>`;
+  h+=`<div class="st"><div class="lbl">TP (384)</div><div class="sv">${tp.s384}</div></div>`;
+  h+=`<div class="st"><div class="lbl">CPT</div><div class="sv sm">${cpt}</div></div>`;
+  h+='</div>';
+
+  // Notes
+  if(panel==="respiratory"){
+    h+=`<div class="note blue"><b>LCD / MP Note:</b> <b>87631</b> (3-5 targets) is the recommended RVP billing code. <b>87632 (6-11 targets) and 87633 (12-25 targets) are uncovered by many insurers</b> — Medicaid, Medicare, and commercial alike. Even if your panel runs 12+ viral targets, bill 87631 based on the applicable LCD/MP to avoid denials. 87637 only applies when CFR is run as a standalone test.</div>`;
+  }
+  if(panel==="uti"){
+    h+=`<div class="note blue"><b>UTI Panel Billing:</b> Most UTI pathogens and AMR targets bill as <b>87798 NOS</b> (each organism) — see 87798 warning below. Specific codes exist for: <b>87640</b> (S. aureus), <b>87641</b> (mecA/MRSA), <b>87500</b> (vanA/vanB), <b>87481</b> (Candida spp.), <b>87491</b> (CT), <b>87591</b> (NG), <b>87661</b> (TV), <b>87563</b> (M. gen). Always use specific codes where available.</div>`;
+  }
+  if(panel==="vaginitis"){
+    h+=`<div class="note blue"><b>Vaginitis Billing:</b> Individual organism codes billed separately. Specific codes: <b>87511</b> (G. vaginalis), <b>87481</b> (Candida spp.), <b>87491</b> (CT), <b>87591</b> (NG), <b>87661</b> (TV), <b>87563</b> (M. gen). BV markers without specific codes (BVAB-2, Meg Types 1 & 2, A. vaginae, M. curtisii) and urogenital organisms (M. hominis, U. urealyticum) use <b>87798 NOS</b>.</div>`;
+  }
+  if(panel==="gi"){
+    h+=`<div class="note blue"><b>GI Panel Billing:</b> Billed as a single multiplex panel code — cannot unbundle into individual targets. <b>87505* (3-5 targets) is the recommended billing code</b> regardless of how many targets you run. Most LCDs and medical policies make it very difficult to meet medical necessity for the larger codes.<br><br><b>*Note:</b> 87506 (6-11 targets) and 87507 (12-25 targets) exist but have significantly stricter med nec requirements. 87507 requires a documented immunosuppression diagnosis (dual Dx). Attempting to bill 87506 or 87507 without airtight documentation matching the LCD criteria will result in denials. Only 1 GIP panel per DOS per beneficiary. No repeat NAAT within 7 days per LCD.</div>`;
+  }
+  if(panel==="wound"){
+    h+=`<div class="note blue"><b>Wound Panel Billing:</b> Individual organism codes billed separately. Specific codes: <b>87640</b> (S. aureus), <b>87651</b> (S. pyogenes), <b>87641</b> (mecA/MRSA), <b>87500</b> (vanA/vanB), <b>87481</b> (Candida spp.). All other ID and AMR targets use <b>87798 NOS</b> — see warning below. Same billing structure as UTI panels.</div>`;
+  }
+  if(panel==="derm"){
+    h+=`<div class="note blue"><b>Derm Panel Billing:</b> Individual organism codes billed separately. Specific codes: <b>87529</b> (HSV-1/HSV-2), <b>87640</b> (S. aureus), <b>87651</b> (S. pyogenes), <b>87641</b> (mecA), <b>87500</b> (vanA/vanB), <b>87481</b> (Candida spp.). Lesion targets (H. ducreyi, T. pallidum, VZV) and all fungal/dermatophyte targets use <b>87798 NOS</b>.</div>`;
+  }
+  // ICD-10 + presenting patient note (wound/derm presets)
+  if(curP !== 'custom' && P.presets[curP] && P.presets[curP].icd){
+    const pr=P.presets[curP];
+    h+=`<div class="note blue">`;
+    if(pr.pt) h+=`<div style="margin-bottom:6px"><b>Presenting Patient:</b> ${pr.pt}</div>`;
+    h+=`<b>ICD-10:</b> ${pr.icd}`;
+    h+=`</div>`;
+  }
+  if(noSTI){
+    h+=`<div class="note warn"><b>No STI Well:</b> EC (Endogenous Control) moves to an AMR well. M. genitalium only available with STI well.</div>`;
+  }
+  if(hasSTI){
+    h+=`<div class="note green"><b>STI Well Active:</b> M. genitalium and EC carried in W6. When removed, EC moves to an AMR well.</div>`;
+  }
+
+  // Universal 87798 warning — show if any active targets use 87798
+  let has87798=false;
+  keys.forEach(k=>{const v=P.wells[k];if(!v)return;
+    v.t.forEach(x=>{if(x.cpt==="87798")has87798=true;});
+  });
+  if(has87798){
+    let count798=0;
+    keys.forEach(k=>{const v=P.wells[k];if(!v)return;
+      v.t.forEach(x=>{if(x.cpt==="87798")count798++;});
+    });
+    h+=`<div class="note red"><b>⚠ 87798 NOS Warning (${count798} units on this config):</b> 87798 is frequently <b>unpaid</b> by many payers and is explicitly <b>excluded</b> in numerous LCDs and medical policies. Some payers do cover it but this must be verified per payer.<br><br><b>MUE / Frequency Limits:</b><br>   • <b>Medicare:</b> CMS MUE is 13 units/day/patient/provider — set your hard edit at 13.<br>   • <b>Commercial / MA / Medicaid:</b> Many payers impose a medically unlikely edit (MFD) as low as <b>3 units/day</b>. If a payer has a documented 3/day MFD, expect denials above 3 even though CMS Medicare MUE is 13. Maintain a <b>payer-specific rule table</b> for 87798 limits.<br><br>High-volume 87798 billing is a known audit trigger. Always use specific CPT codes where available before defaulting to 87798.</div>`;
+  }
+
+  // 87481 MUE warning — show if any active targets use 87481
+  let count481=0;
+  keys.forEach(k=>{const v=P.wells[k];if(!v)return;
+    v.t.forEach(x=>{if(x.cpt==="87481")count481++;});
+  });
+  if(count481>0){
+    h+=`<div class="note ${count481>5?'red':'warn'}"><b>87481 Candida spp. (${count481} units on this config):</b> MUE is <b>5 units/day</b>. ${count481>5?'<b>Current config exceeds MUE — units above 5 will be denied.</b>':'Within MUE limit.'} When billing Candida under 81514 (vaginitis MAAA), individual 87481 codes should not be unbundled.</div>`;
+  }
+
+  // Control MP note
+  if(ctrlWell){
+    if(ctrlFree){
+      h+=`<div class="note green"><b>Controls:</b> PC/NC are multiplexed with ${ctrlNote} (Well ${P.wells[ctrlWell]?.num}). No dedicated control wells needed — throughput is maximized.</div>`;
+    }else if(wCount>0){
+      h+=`<div class="note warn"><b>Controls:</b> ${ctrlNote} (Well ${P.wells[ctrlWell]?.num}) is not selected. PC/NC require <b>2 dedicated wells</b>, reducing throughput by 2 sample positions.</div>`;
+    }
+  }
+
+  // Well cards
+  h+='<div class="wg">';
+  P.order.forEach(wk=>{
+    const v=P.wells[wk];if(!v)return;const on=active.has(wk);
+    const isCtrlWell=wk===ctrlWell;
+    h+=`<div class="wc ${on?'on':'off'}" style="border-color:${on?v.bdr:'#e2e8f0'}" onclick="tg('${wk}')">`;
+    h+=`<div class="td ${on?'on':'off'}">${on?'✓':'○'}</div>`;
+    h+=`<div class="wh" style="background:${on?v.hdr:'#94a3b8'}">`;
+    h+=`<span class="n">${v.num}</span><span class="nm">${v.lbl}${isCtrlWell?' ✨':''}</span></div>`;
+    h+='<div class="wb">';
+    v.t.forEach((tgt,i)=>{
+      const name=tgt.n||tgt;
+      const it=/^[A-Z]/.test(name)&&name.includes('.')&&!name.startsWith('EC');
+      let tag='';
+      if(tgt.cpt){
+        if(tgt.cpt==="87631-33"){
+          tag=wk==="CFR"&&!otherRVP?`<span class="cpt-tag cpt-panel">87637</span>`:`<span class="cpt-tag cpt-panel">RVP</span>`;
+        }else if(tgt.cpt==="GIP"){
+          tag=`<span class="cpt-tag cpt-panel">GIP</span>`;
+        }else if(tgt.cpt==="87798"){
+          tag=`<span class="cpt-tag cpt-nos">87798 NOS</span>`;
+        }else if(tgt.cpt===""){
+          tag=`<span style="font-size:9px;color:#94a3b8;font-weight:600">QC</span>`;
+        }else{
+          tag=`<span class="cpt-tag cpt-ok">${tgt.cpt}</span>`;
+        }
+      }else{
+        tag=`<span style="font-size:9px;color:#94a3b8;font-weight:600">${v.cat}</span>`;
+      }
+      h+=`<div class="tr" style="border-bottom:${i<v.t.length-1?'1px solid '+v.bg:'none'}">
+        <span style="${it?'font-style:italic':''}">${name}</span>${tag}</div>`;
+    });
+    if(isCtrlWell){
+      h+=`<div style="padding:4px 0;margin-top:2px;border-top:1px dashed ${v.bdr};font-size:9px;color:${v.hdr};font-weight:600;text-align:center">PC / NC multiplexed here</div>`;
+    }
+    h+='</div></div>';
+  });
+  h+='</div>';
+
+  // Throughput table
+  if(wCount>0){
+    const spills = wCount > 6 && (8 % wCount !== 0);
+    const columnPacked = wCount <= 6;
+    const nonBreak = wCount > 6 && (8 % wCount === 0);
+    const breakaway = !((8 % wCount === 0) || (wCount === 8)) || (columnPacked && 6 % wCount !== 0);
+    const ctrlPerCol = ctrlFree ? 0 : 2;
+    const ctrl96 = 96 - (tp.s96 * wCount);
+    const ctrl384 = 384 - (tp.s384 * wCount);
+    
+    let ctrlDesc = '';
+    if(ctrlFree) ctrlDesc = `Controls MP with ${ctrlNote} — no dedicated control wells needed`;
+    else if(spills) ctrlDesc = `Breakaway: each sample gets own PC + NC (${wCount} + 2 = ${wCount+2} wells per sample)`;
+    else if(columnPacked) ctrlDesc = `${Math.floor(6/wCount)} sample(s) + 1 PC + 1 NC per column (${Math.floor(6/wCount)*wCount + 2} = 8 wells)`;
+    else ctrlDesc = `Non-breakaway: 1 PC + 1 NC per plate (2 control wells total)`;
+
+    h+=`<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px 16px;margin-top:8px">`;
+    h+=`<div style="font-size:12px;font-weight:700;margin-bottom:4px">Plate Throughput</div>`;
+    h+=`<div style="font-size:10px;color:#64748b;margin-bottom:8px">${ctrlDesc}</div>`;
+    h+=`<table class="tp"><thead><tr><th>Plate</th><th>Total</th><th>Controls</th><th>Target Wells</th><th style="color:#16a34a">Patients</th><th>Format</th></tr></thead><tbody>`;
+    h+=`<tr><td>96-Well</td><td>96</td><td>${ctrl96}</td><td>${tp.s96*wCount}</td><td class="tp-green">${tp.s96}</td>`;
+    h+=`<td style="font-size:10px">${breakaway?'<span class="tp-warn">Breakaway</span>':'Standard'}</td></tr>`;
+    h+=`<tr><td>384-Well</td><td>384</td><td>${ctrl384}</td><td>${tp.s384*wCount}</td><td class="tp-green">${tp.s384}</td>`;
+    h+=`<td style="font-size:10px">Standard</td></tr>`;
+    h+=`</tbody></table></div>`;
+  }
+
+  document.getElementById('app').innerHTML=h;
+}
+
+function stat(l,v){return`<div class="st"><div class="lbl">${l}</div><div class="sv">${v}</div></div>`;}
+
+// ══════════════════════════════════════════════════════════════
+// ACTIONS
+// ══════════════════════════════════════════════════════════════
+function sw(p){
+  panel=p;
+  const P=PANELS[p];
+  active=new Set(P.presets[P.defaultPreset].k);
+  render();
+}
+function tg(k){if(active.has(k))active.delete(k);else active.add(k);render();}
+function ap(key){active=new Set(PANELS[panel].presets[key].k);render();}
+function clearAll(){active=new Set();render();}
+
+render();
+</script>
+</body>
+</html>
